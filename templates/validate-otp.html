@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Verify OTP</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Verify OTP</h2>
+        <form id="verifyOtpForm">
+            <input type="text" id="otp" placeholder="Enter OTP" required>
+            <button type="button" id="validate-otp-btn">Verify</button>
+        </form>
+    </div>
+
+    <!-- Move script here (before closing body tag) -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+    console.log("🔄 Page Loaded: validate_otp.html");
+
+    let identifier = localStorage.getItem("identifier"); // Fetch stored identifier
+    console.log("📌 Retrieved Identifier:", identifier); // Debugging
+
+    if (!identifier) {
+        alert("❌ Error: Identifier not found! Please request a new OTP.");
+        window.location.href = "forgot_password.html"; // Redirect to request new OTP
+        return;
+    }
+
+    document.getElementById("validate-otp-btn").addEventListener("click", function (e) {
+        e.preventDefault();
+
+        let otp = document.getElementById("otp").value.trim();
+        console.log("🔢 Entered OTP:", otp); // Debugging
+
+        if (!otp) {
+            alert("❌ Please enter the OTP!");
+            return;
+        }
+
+        console.log("📡 Sending request to /validate-otp...");
+        
+        fetch("/validate-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ identifier: identifier, otp: otp }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("🔄 Server Response:", data);
+
+            if (data.message) {
+                alert("✅ OTP Verified! Redirecting...");
+                window.location.href = "reset_password.html"; // Redirect after OTP validation
+            } else {
+                alert("❌ Invalid or Expired OTP.");
+            }
+        })
+        .catch(error => console.error("❌ Fetch Error:", error));
+    });
+});
+
+    </script>
+</body>
+</html>

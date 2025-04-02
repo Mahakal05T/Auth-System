@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Register</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Register</h2>
+        <form id="registerForm">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="text" id="phone" placeholder="Phone Number" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+            <button type="submit">Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="/templates/login.html">Login</a></p>
+    </div>
+
+    <script>
+    document.getElementById("registerForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        let username = document.getElementById("username").value.trim();
+        let email = document.getElementById("email").value.trim();
+        let phone = document.getElementById("phone").value.trim();
+        let password = document.getElementById("password").value.trim();
+        let confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+        if (!username || !email || !phone || !password || !confirmPassword) {
+            alert("❌ All fields are required!");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            alert("❌ Passwords do not match!");
+            return;
+        }
+
+        fetch("http://localhost:8080/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, email, phone, password, confirmPassword }),
+        })
+        .then(response => response.json())
+        .then(data => alert(data.message || data.error))
+        .catch(error => console.error("Error:", error));
+    });
+    </script>
+</body>
+</html>

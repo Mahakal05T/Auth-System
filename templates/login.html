@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <input type="text" id="identifier" placeholder="Email / Phone / Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p><a href="/templates/forgot_password.html">Forgot Password?</a></p>
+        <p>Don't have an account? <a href="/templates/register.html">Sign Up</a></p>
+    </div>
+
+    <script>
+    document.getElementById("loginForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        let identifier = document.getElementById("identifier").value.trim();
+        let password = document.getElementById("password").value.trim();
+
+        if (!identifier || !password) {
+            alert("❌ Please enter your email/phone and password!");
+            return;
+        }
+
+        fetch("http://localhost:8080/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ identifier, password }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert("✅ " + data.message);
+                window.location.href = "dashboard.html"; // Redirect after login
+            } else {
+                alert("❌ " + data.error);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+    </script>
+</body>
+</html>
