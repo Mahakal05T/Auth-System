@@ -1,52 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
-        <h2>Register</h2>
-        <form id="registerForm">
-            <input type="text" id="username" placeholder="Username" required>
-            <input type="email" id="email" placeholder="Email" required>
-            <input type="text" id="phone" placeholder="Phone Number" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
-            <button type="submit">Sign Up</button>
-        </form>
-        <p>Already have an account? <a href="/templates/login.html">Login</a></p>
+        <div class="card">
+            <h2>Register</h2>
+            <form id="registerForm">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="text" id="phone" placeholder="Phone Number" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                <button type="submit">Sign Up</button>
+            </form>
+            <p>Already have an account? <a href="/login">Login</a></p>
+        </div>
     </div>
 
+    <div id="toast-container"></div>
+    <div id="loading-spinner" class="loading-spinner hidden"></div>
+
     <script>
-    document.getElementById("registerForm").addEventListener("submit", function (event) {
-        event.preventDefault();
+        function showToast(message, type = "success") {
+            const toast = document.createElement("div");
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
 
-        let username = document.getElementById("username").value.trim();
-        let email = document.getElementById("email").value.trim();
-        let phone = document.getElementById("phone").value.trim();
-        let password = document.getElementById("password").value.trim();
-        let confirmPassword = document.getElementById("confirmPassword").value.trim();
+            const container = document.getElementById("toast-container");
+            container.appendChild(toast);
 
-        if (!username || !email || !phone || !password || !confirmPassword) {
-            alert("❌ All fields are required!");
-            return;
+            setTimeout(() => {
+                toast.remove();
+            }, 4000);
         }
 
-        if (password !== confirmPassword) {
-            alert("❌ Passwords do not match!");
-            return;
-        }
+        document.getElementById("registerForm").addEventListener("submit", function (event) {
+            event.preventDefault();
 
-        fetch("http://localhost:8080/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, email, phone, password, confirmPassword }),
-        })
-        .then(response => response.json())
-        .then(data => alert(data.message || data.error))
-        .catch(error => console.error("Error:", error));
-    });
+            let username = document.getElementById("username").value.trim();
+            let email = document.getElementById("email").value.trim();
+            let phone = document.getElementById("phone").value.trim();
+            let password = document.getElementById("password").value.trim();
+            let confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+            if (!username || !email || !phone || !password || !confirmPassword) {
+                showToast("❌ All fields are required!", "error");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showToast("❌ Passwords do not match!", "error");
+                return;
+            }
+
+            // Show loading spinner
+            document.getElementById("loading-spinner").classList.remove("hidden");
+
+            fetch("/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, email, phone, password, confirmPassword }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading spinner after response
+                document.getElementById("loading-spinner").classList.add("hidden");
+                showToast(data.message || data.error, data.message ? "success" : "error");
+            })
+            .catch(error => {
+                // Hide loading spinner on error
+                document.getElementById("loading-spinner").classList.add("hidden");
+                console.error("Error:", error);
+                showToast("❌ Something went wrong. Please try again.", "error");
+            });
+        });
     </script>
 </body>
 </html>

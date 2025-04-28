@@ -1,49 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
-        <h2>Login</h2>
-        <form id="loginForm">
-            <input type="text" id="identifier" placeholder="Email / Phone / Username" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <button type="submit">Login</button>
-        </form>
-        <p><a href="/templates/forgot_password.html">Forgot Password?</a></p>
-        <p>Don't have an account? <a href="/templates/register.html">Sign Up</a></p>
+        <div class="card">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="text" id="identifier" placeholder="Email / Phone / Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <p><a href="/forgot_password">Forgot Password?</a></p>
+            <p>Don't have an account? <a href="/register">Sign Up</a></p>
+        </div>
     </div>
 
+    <div id="toast-container"></div>
+    <div id="loading-spinner" class="loading-spinner hidden"></div>
+
     <script>
-    document.getElementById("loginForm").addEventListener("submit", function (event) {
-        event.preventDefault();
+        function showToast(message, type = "success") {
+            const toast = document.createElement("div");
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
 
-        let identifier = document.getElementById("identifier").value.trim();
-        let password = document.getElementById("password").value.trim();
+            const container = document.getElementById("toast-container");
+            container.appendChild(toast);
 
-        if (!identifier || !password) {
-            alert("❌ Please enter your email/phone and password!");
-            return;
+            setTimeout(() => {
+                toast.remove();
+            }, 4000);
         }
 
-        fetch("http://localhost:8080/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ identifier, password }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                alert("✅ " + data.message);
-                window.location.href = "dashboard.html"; // Redirect after login
-            } else {
-                alert("❌ " + data.error);
+        document.getElementById("loginForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            let identifier = document.getElementById("identifier").value.trim();
+            let password = document.getElementById("password").value.trim();
+
+            if (!identifier || !password) {
+                showToast("❌ Please enter your email/phone and password!", "error");
+                return;
             }
-        })
-        .catch(error => console.error("Error:", error));
-    });
+
+            // Show loading spinner
+            document.getElementById("loading-spinner").classList.remove("hidden");
+
+            fetch("/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ identifier, password }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading spinner after response
+                document.getElementById("loading-spinner").classList.add("hidden");
+
+                if (data.message) {
+                    showToast("✅ " + data.message, "success");
+                    setTimeout(() => {
+                        window.location.href = "dashboard.html";
+                    }, 2000);
+                } else {
+                    showToast("❌ " + data.error, "error");
+                }
+            })
+            .catch(error => {
+                // Hide loading spinner on error
+                document.getElementById("loading-spinner").classList.add("hidden");
+                console.error("Error:", error);
+                showToast("❌ Something went wrong. Please try again.", "error");
+            });
+        });
     </script>
 </body>
 </html>

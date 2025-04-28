@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+        <h1 class="text-2xl font-bold text-gray-700">Welcome, <span id="username"></span>!</h1>
+        <p class="text-gray-600 mt-2">This is your dashboard.</p>
+
+        <div id="admin-section" class="hidden mt-5">
+            <h2 class="text-xl font-semibold text-red-500">Admin Controls</h2>
+            <ul class="list-disc list-inside mt-2">
+                <li><a href="/manage-users" class="text-blue-500">Manage Users</a></li>
+                <li><a href="/system-logs" class="text-blue-500">View System Logs</a></li>
+            </ul>
+        </div>
+
+        <button onclick="logout()" class="mt-5 px-4 py-2 bg-red-500 text-white rounded">Logout</button>
+    </div>
+
+    <script>
+        // Fetch user info from server
+        fetch("/user-info")
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("username").innerText = data.username;
+                if (data.role === "admin") {
+                    document.getElementById("admin-section").classList.remove("hidden");
+                }
+            });
+
+        function logout() {
+            window.location.href = "/templates/login.html";
+        }
+    </script>
+</body>
+</html>

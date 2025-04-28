@@ -1,150 +1,132 @@
-# Authentication System Server
+# Authentication System (Flask + MySQL)
 
-This is a simple authentication system using Python's built-in `http.server` module. It provides user registration, login, password reset, and OTP-based authentication using MySQL as the database.
+This project is a secure user authentication system built with **Flask** and **MySQL**, supporting:
+- User registration
+- Login
+- Forgot password with **OTP verification** (Email or SMS)
+- Password reset via **secure token-based links**
+- Admin dashboard access
+- Rate limiting for OTPs
+- Environment variable usage for credentials
+
+---
 
 ## Features
-- ✅ User Registration with Password Hashing (bcrypt)
-- 🔐 Secure User Login with Password Verification
-- 🔑 Forgot Password with OTP Verification (Email/SMS)
-- 🔒 Secure Password Storage & Validation
-- 📩 Email and SMS OTP Sending
-- 🚫 Rate Limiting for OTP Requests
-- 📁 Simple HTTP Server for Authentication
+- Secure password hashing using **bcrypt**
+- OTP verification system via **Twilio SMS** or email
+- Rate limiting for OTP requests
+- Token-based password reset after OTP verification
+- Admin user management
+- Responsive frontend with HTML templates
 
-## Technologies Used
-- Python (`http.server`, `json`, `bcrypt`, `mysql.connector`, `smtplib`, `twilio`)
-- MySQL for Database Management
-- Email Sending using SMTP (Gmail)
-- SMS Sending using Twilio
+---
 
-## Prerequisites
-Ensure you have the following installed:
-- Python 3.x
-- MySQL Server
-- Required Python packages (install using `pip`):
-  ```bash
-  pip install bcrypt mysql-connector-python twilio python-dotenv ratelimit
-  ```
-- `.env` file containing:
-  ```ini
-  EMAIL_USER=your-email@gmail.com
-  EMAIL_PASS=your-email-password
-  TWILIO_SID=your-twilio-sid
-  TWILIO_TOKEN=your-twilio-auth-token
-  TWILIO_PHONE=your-twilio-phone-number
-  ```
+## Tech Stack
+- Python (Flask)
+- MySQL
+- HTML/CSS
+- Twilio API
+- dotenv for environment variables
+- bcrypt for password hashing
+- ratelimit for OTP protection
 
-## Database Setup
-Run the following SQL queries to set up the database:
-```sql
-CREATE DATABASE auth_system;
-USE auth_system;
+---
 
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    phone VARCHAR(20) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL
-);
+## Setup Instructions
 
-CREATE TABLE otp_codes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    identifier VARCHAR(100) NOT NULL,
-    otp VARCHAR(6) NOT NULL,
-    expiry_time DATETIME NOT NULL
-);
-```
-
-## Running the Server
-Start the authentication server by running:
+### 1. Clone the Repository
 ```bash
-python server.py
-```
-It will start the server on `http://localhost:8080`.
-
-## API Endpoints
-### 1. Register a New User
-**POST** `/register`
-#### Request Body (JSON)
-```json
-{
-    "username": "user123",
-    "email": "user@example.com",
-    "phone": "+1234567890",
-    "password": "Secure@123"
-}
-```
-#### Response
-```json
-{"message": "User registered successfully"}
+git clone https://github.com/your-username/your-repo.git
+cd your-repo
 ```
 
-### 2. User Login
-**POST** `/login`
-#### Request Body (JSON)
-```json
-{
-    "identifier": "user@example.com",
-    "password": "Secure@123"
-}
-```
-#### Response
-```json
-{"message": "Login successful"}
+### 2. Create Virtual Environment (optional but recommended)
+```bash
+python -m venv venv
+source venv/bin/activate   # On Windows: venv\Scripts\activate
 ```
 
-### 3. Forgot Password (Request OTP)
-**POST** `/forgot-password`
-#### Request Body (JSON)
-```json
-{
-    "identifier": "user@example.com"
-}
-```
-#### Response
-```json
-{"message": "OTP sent successfully"}
+### 3. Install Requirements
+First, create a file named `requirements.txt` with the following content:
+
+```plaintext
+Flask==3.0.2
+mysql-connector-python==8.3.0
+bcrypt==4.1.2
+twilio==9.0.5
+python-dotenv==1.0.1
+ratelimit==2.2.1
 ```
 
-### 4. Validate OTP
-**POST** `/validate-otp`
-#### Request Body (JSON)
-```json
-{
-    "identifier": "user@example.com",
-    "otp": "123456"
-}
-```
-#### Response
-```json
-{"message": "OTP verified. Proceed to reset password."}
+Then install:
+```bash
+pip install -r requirements.txt
 ```
 
-### 5. Reset Password
-**POST** `/reset-password`
-#### Request Body (JSON)
-```json
-{
-    "identifier": "user@example.com",
-    "new_password": "NewSecure@456"
-}
-```
-#### Response
-```json
-{"message": "Password reset successful"}
+---
+
+## 4. Configure Environment Variables
+Create a `.env` file (or `credentials.env`) in the project directory:
+
+```env
+# Database
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_db_password
+DB_NAME=your_database_name
+
+# Twilio
+TWILIO_ACCOUNT_SID=your_account_sid
+TWILIO_AUTH_TOKEN=your_auth_token
+TWILIO_PHONE_NUMBER=your_twilio_phone_number
+
+# Email Settings (if using email OTPs)
+EMAIL_USER=your_email@example.com
+EMAIL_PASS=your_email_password
+SECRET_KEY=your_flask_secret_key
 ```
 
-## Security Features
-- 🛡️ Passwords are hashed using Bcrypt
-- 🔒 Secure Cookies (`Secure; HttpOnly; SameSite=Strict`)
-- 🚫 Rate limiting for OTP requests (3 requests per minute)
+> 🔥 Make sure to never push your `.env` file to public repositories!
+
+---
+
+## 5. Run the Flask Application
+```bash
+python app.py
+```
+Visit:
+```
+http://127.0.0.1:5000/
+```
+
+---
+
+## Folder Structure
+```bash
+/your-repo
+  |-- app.py
+  |-- requirements.txt
+  |-- /templates
+      |-- login.html
+      |-- register.html
+      |-- forgot_password.html
+      |-- reset_password.html
+      |-- dashboard.html
+  |-- /static
+      |-- (CSS, JS, images)
+  |-- credentials.env
+  |-- README.md
+```
+
+---
 
 ## Notes
-- The system supports login using email, phone, or username.
-- OTPs expire in 10 minutes.
-- Ensure MySQL is running before starting the server.
+- Ensure that your MySQL database and tables are correctly set up before running the application.
+- Adjust Twilio settings if you are sending SMS OTPs internationally.
+- Flask’s `SECRET_KEY` should be strong and random for production environments.
+- You can extend the dashboard to show more user data or analytics!
+
+---
 
 ## License
-MIT License
-
+This project is licensed under the MIT License.
