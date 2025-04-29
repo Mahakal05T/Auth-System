@@ -36,8 +36,8 @@ This project is a secure user authentication system built with **Flask** and **M
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/your-repo.git
-cd your-repo
+git clone https://github.com/Mahakal05T/Auth-System.git
+cd Auth-System 
 ```
 
 ### 2. Create Virtual Environment (optional but recommended)
